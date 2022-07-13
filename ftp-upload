@@ -1,56 +1,24 @@
 #!/bin/bash
 
-# Defaults:
-HOST=""
-DEST_PATH=""
-USER=""
-PASSWORD=""
-
-
-usage () {
-  echo "Usage: $0 [OPTIONS] FILE"
-  echo ""
-  echo "Options:"
-  echo "  -h, --help                             Print this help text and exit"
-  
-  exit 1
-}
-
-
-PARSED_ARGUMENTS=$(getopt -n ftp-upload -o h -l help -- "$@")
-VALID_ARGUMENTS=$?
-if [ "$VALID_ARGUMENTS" != "0" ]; then
-  usage
-fi
-
-eval set -- "$PARSED_ARGUMENTS"
-
-
-while :
-do
-  case "$1" in
-    -h | --help)    echo 123;;
-    --) shift; break;;
-  esac
-done
-
-
 if [ "$(ping -q -c1 google.com &>/dev/null)" -ne 0 ]; then
-	notify-send "ftp-upload" "No internet connection!"
+	notify-send "upload.sh" "No internet connection!"
 	exit 1
 fi
 
+HOST=""
+DEST_PATH=""
+USER=""
 PASSWORD=$(zenity --password)
 
-ftp -inv "$HOST" <<EOF
+ftp -inv $HOST <<EOF
 user $USER $PASSWORD
 cd $DEST_PATH
-put $1 $(basename "$1")
+put $1 $(basename $1)
 bye
 EOF
 
 if [ $? -eq 0 ]; then
-	notify-send "ftp-upload" "File \"${1}\" uploaded successfully!"
+	notify-send "upload.sh" "File \"${1}\" uploaded successfully!"
 else
-	notify-send "ftp-upload" "Error uploading file \"${1}\" :("
+	notify-send "upload.sh" "Error uploading file \"${1}\" :("
 fi
